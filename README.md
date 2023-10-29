@@ -311,32 +311,26 @@ Ao clicar no arquivo `fast_zero/app.py`, podemos visualizar em vermelho as linha
 
 Isso indica que precisamos criar testes para cobrir todo esse arquivo.
 
-### Escrevendo o teste
+### Escrevendo o Teste
 
-Agora, vamos escrever nosso primeiro teste com Pytest.
+Agora, vamos criar nosso primeiro teste com Pytest.
 
-Para testar o FastAPI, precisamos de um cliente de teste. Isso pode ser obtido no módulo fastapi.testclient com o objeto TestClient, que precisa receber nosso app como parâmetro:
+Para testar o FastAPI, precisamos de um cliente de teste. Podemos obtê-lo no módulo `fastapi.testclient` com o objeto `TestClient`, que precisa receber nosso `app` como parâmetro. Vamos criar um arquivo no diretório `tests` chamado `test_app.py` e adicionar o seguinte código:
 
-```py
-# crie uma arquivo no diretorio tests
-# tests/test_app.py
-# E adicione o codigo
+```python
 from fastapi.testclient import TestClient
 from fast_zero.app import app
 
 client = TestClient(app)
 ```
 
-Só o fato de termos definido um cliente, já nos mostra uma cobertura bastante diferente.
-
-execute o comando task test, no terminal:
+O simples fato de definirmos um cliente já reflete uma cobertura significativamente diferente. Execute o comando `task test` no terminal:
 
 ```bash
 task test
 ```
 
-se apresentar algum erro de formatação execute, task format novamente,
-em seguida execute o teste.
+Se algum erro de formatação for apresentado, execute `task format` novamente e, em seguida, execute o teste.
 
 ```bash
 ---------- coverage: platform darwin, python 3.11.2-final-0 ----------
@@ -348,25 +342,22 @@ fast_zero/app.py            5      1    80%
 TOTAL                       5      1    80%
 ```
 
-Devido ao fato de não ter coletado nenhum teste, o pytest ainda retornou um "erro". Para ver a cobertura, precisaremos executar novamente o post_test manualmente:
-
-vamos executar novamente o comando task post_test:
+Como nenhum teste foi coletado, o pytest ainda retorna um "erro". Para ver a cobertura, precisaremos executar manualmente o `post_test` novamente. Execute o comando `task post_test`:
 
 ```bash
 task post_test
 ```
 
-No navegador, podemos ver que a única linha não "testada" é aquela onde temos a lógica do endpoint:
+No navegador, podemos observar que a única linha não "testada" é aquela que contém a lógica do endpoint.
 
-![Alt text](https://fastapidozero.dunossauro.com/assets/02_navegador_com_pagina_de_cobertura_com_estrutuda_de_testes.png)
+![Coverage Report with Test Structure](https://fastapidozero.dunossauro.com/assets/02_navegador_com_pagina_de_cobertura_com_estrutuda_de_testes.png)
 
-No verde vemos o que foi executado quando chamamos o teste, no vermelho o que não foi.
+Os trechos em verde mostram o que foi executado durante o teste, enquanto os trechos em vermelho indicam o que não foi testado.
 
-Para resolver isso, temos que criar um teste de fato, fazendo uma chamada para nossa API usando o cliente de teste que definimos:
+Para resolver isso, precisamos criar um teste de fato, fazendo uma chamada para nossa API usando o cliente de teste que definimos. Adicione o seguinte teste:
 
-```py
+```python
 from fastapi.testclient import TestClient
-
 from fast_zero.app import app
 
 def test_root_deve_retornar_200_e_ola_mundo():
@@ -377,9 +368,9 @@ def test_root_deve_retornar_200_e_ola_mundo():
     assert response.json() == {'message': 'Olá Mundo!'}
 ```
 
-Esse teste faz uma requisição GET no endpoint / e verifica se o código de status da resposta é 200 e se o conteúdo da resposta é {'message': 'Olá Mundo!'}.
+Esse teste realiza uma requisição GET no endpoint `/` e verifica se o código de status da resposta é 200 e se o conteúdo da resposta é {'message': 'Olá Mundo!'}.
 
-uma mensagem como essa deve ser apresentada:
+Você deve ver uma mensagem como esta:
 
 ```bash
 collected 1 item
@@ -398,8 +389,42 @@ TOTAL                       5      0   100%
 ====================================== 1 passed in 0.40s =======================================
 ```
 
-Dessa forma, temos um teste que coletou 1 item (1 teste). Esse teste foi aprovado e a cobertura não deixou de abranger nenhuma linha de código.
+Agora temos um teste que coletou 1 item (1 teste). Este teste foi aprovado e a cobertura abrangeu todas as linhas de código.
 
-Como conseguimos coletar um item, o post_test foi executado e também gerou um HTML com a cobertura atualizada.
+Como conseguimos coletar um item, o `post_test` foi executado e também gerou um HTML com a cobertura atualizada.
 
-![Alt text](https://fastapidozero.dunossauro.com/assets/02_navegador_com_pagina_de_cobertura_com_teste.png)
+![Coverage Report with Test](https://fastapidozero.dunossauro.com/assets/02_navegador_com_pagina_de_cobertura_com_teste.png)
+
+Certamente, aqui está o texto melhorado:
+
+### Estrutura de um Teste
+
+Agora que elaboramos nosso teste de forma intuitiva, é essencial compreender o propósito de cada etapa do teste. Essa compreensão é crucial, pois pode nos auxiliar a escrever testes no futuro com mais confiança e eficácia. Para entender o método por trás da nossa abordagem, vamos explorar a estratégia conhecida como AAA, que divide o teste em três fases distintas: Arrange, Act e Assert.
+
+Vamos analisar o teste que desenvolvemos e compreender as etapas que tomamos para testar o endpoint:
+
+```python
+from fastapi.testclient import TestClient
+from fast_zero.app import app
+
+def test_root_deve_retornar_200_e_ola_mundo():
+    client = TestClient(app)  # Arrange
+
+    response = client.get('/')  # Act
+
+    assert response.status_code == 200  # Assert
+    assert response.json() == {'message': 'Olá Mundo!'}  # Assert
+```
+
+Com base neste código, podemos identificar as três fases:
+
+Fase 1 - Preparação (Arrange)
+Nesta etapa inicial, preparamos o ambiente para o teste. No exemplo, a linha com o comentário "Arrange" não é o próprio teste; ela configura o ambiente para a execução do teste. Estamos preparando um cliente de testes para fazer uma requisição à aplicação.
+
+Fase 2 - Ação (Act)
+Aqui ocorre a etapa principal do teste, que consiste em chamar o Sistema Sob Teste (SUT). No nosso caso, o SUT é a rota / e a ação é representada pela linha `response = client.get('/')`. Estamos exercitando a rota e armazenando a resposta na variável response. Nesta fase, o código de teste interage diretamente com a parte do sistema que queremos avaliar, a fim de observar seu comportamento.
+
+Fase 3 - Verificação (Assert)
+Esta etapa envolve a verificação se tudo ocorreu como esperado. É fácil identificar onde fazemos essa verificação, pois essa linha sempre contém a palavra reservada `assert`. A verificação é booleana; ou está correta ou não está. Portanto, um teste sempre deve incluir um `assert` para verificar se o comportamento esperado está correto.
+
+Agora que compreendemos o propósito de cada linha de teste de forma específica, podemos nos orientar de maneira clara ao escrever testes no futuro. Cada uma das linhas usadas tem uma razão de ser no teste, e conhecer essa estrutura não apenas nos proporciona uma compreensão mais profunda do que estamos fazendo, mas também nos dá confiança para explorar e elaborar testes mais complexos.
