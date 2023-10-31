@@ -1,6 +1,6 @@
 # Tutorial de Python com FastAPI
 
-## Baseado no tutorial do **dunossauro**.
+## Baseado no tutorial do **dunossauro**
 
 Link da fonte: [Tutorial FastAPI do dunossauro](https://fastapidozero.dunossauro.com/)
 
@@ -130,7 +130,7 @@ poetry shell
 uvicorn fast_zero.app:app --reload
 ```
 
-Acesse http://localhost:8000 no seu navegador e você deve ver a mensagem "Olá Mundo!" no formato JSON.
+Acesse <http://localhost:8000> no seu navegador e você deve ver a mensagem "Olá Mundo!" no formato JSON.
 
 Claro, aqui está o texto melhorado:
 
@@ -428,3 +428,8 @@ Fase 3 - Verificação (Assert)
 Esta etapa envolve a verificação se tudo ocorreu como esperado. É fácil identificar onde fazemos essa verificação, pois essa linha sempre contém a palavra reservada `assert`. A verificação é booleana; ou está correta ou não está. Portanto, um teste sempre deve incluir um `assert` para verificar se o comportamento esperado está correto.
 
 Agora que compreendemos o propósito de cada linha de teste de forma específica, podemos nos orientar de maneira clara ao escrever testes no futuro. Cada uma das linhas usadas tem uma razão de ser no teste, e conhecer essa estrutura não apenas nos proporciona uma compreensão mais profunda do que estamos fazendo, mas também nos dá confiança para explorar e elaborar testes mais complexos.
+
+```bash
+# Comando para criar o .gitignore no projeto
+ignr -p python > .gitignore
+```
