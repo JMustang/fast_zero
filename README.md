@@ -433,3 +433,32 @@ Agora que compreendemos o propósito de cada linha de teste de forma específica
 # Comando para criar o .gitignore no projeto
 ignr -p python > .gitignore
 ```
+
+## Alembic
+
+Instalando o Alembic, que é uma ferramenta de migração de banco de dados para SQLAlchemy.
+
+```bash
+poetry add alembic
+```
+
+Após a instalação do Alembic, precisamos iniciá-lo em nosso projeto.
+O comando de inicialização criará um diretório migrations e um arquivo de configuração alembic.ini:
+Comando:
+
+```bash
+alembic init migrations
+```
+
+Para criar a migração, utilizamos o seguinte comando:
+
+```bash
+alembic revision --autogenerate -m "create users table"
+```
+
+Para aplicar as migrações, usamos o comando upgrade do CLI Alembic.
+O argumento head indica que queremos aplicar todas as migrações que ainda não foram aplicadas:
+
+```bash
+alembic upgrade head
+```
