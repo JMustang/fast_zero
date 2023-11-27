@@ -17,8 +17,11 @@ def read_root():
 
 
 @app.get('/users/', status_code=status.HTTP_200_OK, response_model=UserList)
-def read_users():
-    return {'users': database}
+def read_users(
+    skip: int = 0, limit: int = 100, session: Session = Depends(get_session)
+):
+    users = session.scalars(select(User).offset(skip).limit(limit)).all()
+    return {'users': users, 'count': len(users)}
 
 
 @app.post(
