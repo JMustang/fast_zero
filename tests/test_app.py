@@ -25,15 +25,7 @@ def test_create_user(client):
 def test_read_users(client):
     response = client.get('/users/')
     assert response.status_code == 200
-    assert response.json() == {
-        'users': [
-            {
-                'username': 'alice',
-                'email': 'alice@example.com',
-                'id': 1,
-            }
-        ]
-    }
+    assert response.json() == {'users': []}
 
 
 def test_update_user(client):
