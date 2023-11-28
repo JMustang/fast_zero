@@ -59,3 +59,13 @@ def test_delete_user(client, user):
 
     assert response.status_code == 404
     assert response.json() == {'detail': 'User deleted'}
+
+
+def test_delete_user_invalid_id(client, user):
+    # Escolha um ID que você sabe que não existe no seu sistema
+    invalid_user_id = 9999
+
+    response = client.delete(f'/users/{invalid_user_id}')
+
+    assert response.status_code == 404
+    assert response.json() == {'detail': 'User not found'}
