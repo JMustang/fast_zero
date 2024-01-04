@@ -1,18 +1,70 @@
 from datetime import datetime, timedelta
 
-from jose import jwt
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.orm import Session
+from sqlalchemy import select
+from fast_zero.database import get_session
+from fast_zero.models import User
+from fast_zero.schemas import TokenData
+
+from jose import jwt, JWTError
 from passlib.context import CryptContext
 
-SECRET_KEY = 'chave-secreta'
-ALGORITHM = 'HS256'
+SECRET_KEY = "chave-secreta"
+ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
-pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
+async def get_current_user(
+    session: Session = Depends(get_session), token: str = Depends(oauth2_scheme)
+):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if not username:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+
+    except JWTError:
+        raise credentials_exception
+
+    user = session.scalar(select(User).where(User.email == token_data.username))
+    if user is None:
+        raise credentials_exception
+    return user
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+
+    user = session.execute(
+        select(User).where(User.username == token_data.username)
+    ).scalar_one_or_none()
+    if user is None:
+        raise credentials_exception
+
+    return user
 
 
 def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({'exp': expire})
+    to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
