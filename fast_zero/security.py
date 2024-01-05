@@ -16,7 +16,7 @@ ALGORITHM = 'HS256'
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token')
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/token')
 
 
 async def get_current_user(
@@ -44,7 +44,7 @@ async def get_current_user(
     )
     if user is None:
         raise credentials_exception
-    return user
+    # return user
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
