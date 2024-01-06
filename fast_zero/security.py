@@ -11,12 +11,29 @@ from fast_zero.database import get_session
 from fast_zero.models import User
 from fast_zero.schemas import TokenData
 
-SECRET_KEY = 'chave-secreta'
+SECRET_KEY = 'your-secret-key'  # Isso é privisório, vamos ajustar!
 ALGORITHM = 'HS256'
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/token')
+
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({'exp': expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+
+def get_password_hash(password: str):
+    return pwd_context.hash(password)
+
+
+def verify_password(plain_password: str, hashed_password: str):
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token')
 
 
 async def get_current_user(
@@ -35,46 +52,14 @@ async def get_current_user(
         if not username:
             raise credentials_exception
         token_data = TokenData(username=username)
-
     except JWTError:
         raise credentials_exception
 
     user = session.scalar(
         select(User).where(User.email == token_data.username)
     )
-    if user is None:
-        raise credentials_exception
-    # return user
 
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get('sub')
-        if username is None:
-            raise credentials_exception
-        token_data = TokenData(username=username)
-    except JWTError:
-        raise credentials_exception
-
-    user = session.execute(
-        select(User).where(User.username == token_data.username)
-    ).scalar_one_or_none()
     if user is None:
         raise credentials_exception
 
     return user
-
-
-def create_access_token(data: dict):
-    to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({'exp': expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-
-
-def get_password_hash(password: str):
-    return pwd_context.hash(password)
-
-
-def verify_password(plain_password: str, hashed_password: str):
-    return pwd_context.verify(plain_password, hashed_password)

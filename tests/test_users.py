@@ -40,7 +40,7 @@ def test_update_user(client, user, token):
             'password': 'mynewpassword',
         },
     )
-    assert response.status_code == 401
+    assert response.status_code == 200
     assert response.json() == {
         'username': 'bob',
         'email': 'bob@example.com',
@@ -54,5 +54,5 @@ def test_delete_user(client, user, token):
         headers={'Authorization': f'Bearer {token}'},
     )
 
-    assert response.status_code == 401
+    assert response.status_code == 404
     assert response.json() == {'detail': 'User deleted'}
