@@ -32,6 +32,7 @@ isort = "^5.12.0"
 # (conforme sugerido na PEP 8) e em seguida,
 # informaremos que o diretório de ambiente virtual
 # e o de migrações de banco de dados deverão ser ignorados:
+factory-boy = "^3.3.0"
 [tool.ruff]
 line-length = 79
 exclude = ['.venv', 'migrations']
