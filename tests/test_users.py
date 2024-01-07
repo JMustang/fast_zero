@@ -70,3 +70,12 @@ def test_delete_user(client, user, token):
 
     assert response.status_code == 404
     assert response.json() == {'detail': 'User deleted'}
+
+
+def test_delete_user_with_wrong_user(client, other_user, token):
+    response = client.delete(
+        f'/users/{other_user.id}',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+    assert response.status_code == 400
+    assert response.json() == {'detail': 'Not enough permissions'}
