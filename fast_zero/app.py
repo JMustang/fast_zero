@@ -1,6 +1,6 @@
 from fastapi import FastAPI, status
 
-from fast_zero.routes import auth, users, todos
+from fast_zero.routes import auth, todos, users
 
 app = FastAPI()
 
@@ -9,6 +9,6 @@ app.include_router(auth.router)
 app.include_router(todos.router)
 
 
-@app.get("/", status_code=status.HTTP_200_OK)
+@app.get('/', status_code=status.HTTP_200_OK)
 def read_root():
-    return {"message": "Olá Mundo!"}
+    return {'message': 'Olá Mundo!'}
