@@ -1,4 +1,5 @@
 from pydantic import BaseModel, ConfigDict, EmailStr
+
 from fast_zero.models import TodoState
 
 

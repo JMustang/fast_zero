@@ -12,12 +12,16 @@ router = APIRouter()
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
-router = APIRouter(prefix="/todos", tags=["todos"])
+router = APIRouter(prefix='/todos', tags=['todos'])
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=TodoPublic)
+@router.post(
+    '/', status_code=status.HTTP_201_CREATED, response_model=TodoPublic
+)
 def create_todo(
-    todo: TodoSchema, user: CurrentUser, session: Session = Depends(get_session)
+    todo: TodoSchema,
+    user: CurrentUser,
+    session: Session = Depends(get_session),
 ):
     db_todo: Todo = Todo(
         title=todo.title,
