@@ -40,3 +40,15 @@ def test_list_todos(session, client, user, token):
         headers={"Authorization": f"Bearer {token}"},
     )
     assert len(response.json()["todos"]) == 5
+
+
+def test_list_todos_pagination(session, user, client, token):
+    session.bulk_save_objects(TodoFactory.create_batch(5, user_id=user.id))
+    session.commit()
+
+    response = client.get(
+        "/todos/?offset=1&limit=2",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert len(response.json()["todos"]) == 2
