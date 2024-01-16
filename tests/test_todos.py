@@ -29,3 +29,14 @@ class TodoFactory(factory.Factory):
     description = factory.Faker("text")
     state = factory.fuzzy.FuzzyChoice(TodoState)
     user_id = 1
+
+
+def test_list_todos(session, client, user, token):
+    session.bulk_save_objects(TodoFactory.create_batch(5, user_id=user.id))
+    session.commit()
+
+    response = client.get(
+        "/todos/",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert len(response.json()["todos"]) == 5
