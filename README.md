@@ -516,3 +516,72 @@ Em uma aplicação web, o processo de autenticação geralmente funciona da segu
 2.O servidor verifica as credenciais e, se estiverem corretas, gera um token JWT e o envia de volta ao cliente;
 3.Nas solicitações subsequentes, o cliente deve incluir esse token no cabeçalho de autorização de suas solicitações. Como, por exemplo: Authorization: Bearer <token>;
 4.Quando o servidor recebe uma solicitação com um token JWT, ele pode verificar a assinatura e se o token é válido e não expirou, ele processa a solicitação.
+
+## Dockerizando a nossa aplicação
+
+Docker é uma plataforma aberta que permite automatizar o processo de implantação,
+escalonamento e operação de aplicações dentro de contêineres.
+Ele serve para "empacotar" uma aplicação e suas dependências em um contêiner virtual que pode ser executado em qualquer sistema operacional que suporte Docker.
+Isso facilita a implantação,
+o desenvolvimento e o compartilhamento de aplicações,
+além de proporcionar um ambiente isolado e consistente.
+
+## Criando Dockerfile
+
+Para criar um container Docker,
+escrevemos uma lista de passos de como construir o ambiente para execução da nossa aplicação em um arquivo chamado Dockerfile.
+Ele define o ambiente de execução,
+os comandos necessários para preparar o ambiente e o comando a ser executado quando um contêiner é iniciado a partir da imagem.
+
+Uma das coisas interessantes sobre Docker é que existe um Hub de containers prontos onde a comunidade hospeda imagens "prontas",
+que podemos usar como ponto de partida. Por exemplo,
+a comunidade de python mantém um grupo de imagens com o ambiente python pronto para uso.
+Podemos partir dessa imagem com o python já instalado adicionar os passos para que nossa aplicação seja executada.
+
+Aqui está um exemplo de Dockerfile para executar nossa aplicação:
+
+```dockerfile
+FROM python:3.11-slim
+ENV POETRY_VIRTUALENVS_CREATE=false
+
+WORKDIR app/
+COPY . .
+
+RUN pip install poetry
+
+RUN poetry config installer.max-workers 10
+RUN poetry install --no-interaction --no-ansi
+
+EXPOSE 8000
+CMD [ "poetry", "run", "uvicorn", "--host", "0.0.0.0", "fast_zero.app:app" ]
+```
+
+1.FROM python:3.11-slim: define a imagem base para nosso contêiner.
+Estamos usando a versão slim da imagem do Python 3.11,
+que tem tudo que precisamos para rodar nossa aplicação.
+
+2.ENV POETRY_VIRTUALENVS_CREATE=false:
+define uma variável de ambiente que diz ao Poetry para não criar um ambiente virtual.
+(O container já é um ambiente isolado)
+
+3.RUN pip install poetry: instala o Poetry,
+nosso gerenciador de pacotes.
+
+4.WORKDIR app/: define o diretório em que executaremos os comandos a seguir.
+
+5.COPY . .: copia todos os arquivos do diretório atual para o contêiner.
+
+6.RUN poetry config installer.max-workers 10: configura o Poetry para usar até 10 workers ao instalar pacotes.
+
+7.RUN poetry install --no-interaction --no-ansi: instala as dependências do nosso projeto sem interação e sem cores no output.
+
+8.EXPOSE 8000: informa ao Docker que o contêiner escutará na porta 8000.
+
+9.CMD [ "poetry", "run", "uvicorn", "--host", "0.0.0.0", "fast_zero.app:app" ]: define o comando que será executado quando o contêiner for iniciado.
+
+Entendendo melhor esse último comando:
+
+- poetry run define o comando que será executado dentro do ambiente virtual criado pelo Poetry.
+- uvicorn é o servidor ASGI que usamos para rodar nossa aplicação.
+- --host define o host que o servidor escutará. Especificamente, "0.0.0.0" é um endereço IP que permite que o servidor aceite conexões de qualquer endereço de rede disponível, tornando-o acessível externamente.
+- fast_zero.app:app define o <módulo python>:<objeto> que o servidor executará.
