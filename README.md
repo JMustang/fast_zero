@@ -585,3 +585,21 @@ Entendendo melhor esse último comando:
 - uvicorn é o servidor ASGI que usamos para rodar nossa aplicação.
 - --host define o host que o servidor escutará. Especificamente, "0.0.0.0" é um endereço IP que permite que o servidor aceite conexões de qualquer endereço de rede disponível, tornando-o acessível externamente.
 - fast_zero.app:app define o <módulo python>:<objeto> que o servidor executará.
+
+## Ciando uma imagem no Docker
+
+Para criar uma imagem Docker a partir do Dockerfile, usamos o comando docker build. O comando a seguir cria uma imagem chamada "fast_zero":
+
+```bash
+docker build -t "fast_zero" .
+```
+
+Este comando lê o Dockerfile no diretório atual (indicado pelo .) e cria uma imagem com a tag "fast_zero", (indicada pelo -t).
+
+Então verificaremos se a imagem foi criada com sucesso usando o comando:
+
+```bash
+docker images
+```
+
+Este comando lista todas as imagens Docker disponíveis no seu sistema.
