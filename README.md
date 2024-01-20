@@ -635,3 +635,75 @@ docker docker rm fastzeroapp
 ```
 
 Ambos os comandos (stop e rm) usam o nome do contêiner que definimos anteriormente com a flag --name. É uma boa prática manter a gestão dos seus contêineres, principalmente durante o desenvolvimento, para evitar um uso excessivo de recursos ou conflitos de nomes e portas.
+
+## Introduzindo o postgreSQL
+
+O PostgreSQL é um Sistema de Gerenciamento de Banco de Dados Objeto-Relacional (ORDBMS) poderoso e de código aberto. Ele é amplamente utilizado em produção em muitos projetos devido à sua robustez, escalabilidade e conjunto de recursos extensos.
+
+Mudar para um banco de dados como PostgreSQL tem vários benefícios:
+
+Escalabilidade: SQLite não é ideal para aplicações em larga escala ou com grande volume de dados. PostgreSQL foi projetado para lidar com uma grande quantidade de dados e requisições.
+Concorrência: diferentemente do SQLite, que tem limitações para gravações simultâneas, o PostgreSQL suporta múltiplas operações simultâneas.
+Funcionalidades avançadas: PostgreSQL vem com várias extensões e funcionalidades que o SQLite pode não oferecer.
+Além disso, SQLite tem algumas limitações que podem torná-lo inadequado para produção em alguns casos. Por exemplo, ele não suporta alta concorrência e pode ter problemas de performance com grandes volumes de dados.
+
+## Como executar o postgres?
+
+Embora o PostgreSQL seja poderoso, sua instalação direta em uma máquina real pode ser desafiadora e pode resultar em configurações diferentes entre os ambientes de desenvolvimento. Felizmente, podemos utilizar o Docker para resolver esse problema. No Docker Hub, estão disponíveis imagens pré-construídas do PostgreSQL, permitindo-nos executar o PostgreSQL com um único comando. Confira a imagem oficial do PostgreSQL.
+
+Para executar um contêiner do PostgreSQL, use o seguinte comando:
+
+```bash
+docker run -d \
+    --name app_database \
+    -e POSTGRES_USER=app_user \
+    -e POSTGRES_DB=app_db \
+    -e POSTGRES_PASSWORD=app_password \
+    -p 5432:5432 \
+    postgres
+```
+
+### Explicando as Flags e Configurações
+
+Flag -e:
+Esta flag é usada para definir variáveis de ambiente no contêiner. No contexto do PostgreSQL, essas variáveis são essenciais. Elas configuram o nome de usuário, nome do banco de dados, e senha durante a primeira execução do contêiner. Sem elas, o PostgreSQL pode não iniciar da forma esperada. É uma forma prática de configurar o PostgreSQL sem interagir manualmente ou criar arquivos de configuração.
+
+Porta 5432:
+O PostgreSQL, por padrão, escuta por conexões na porta 5432. Mapeando esta porta do contêiner para a mesma porta no host (usando -p), fazemos com que o PostgreSQL seja acessível nesta porta na máquina anfitriã, permitindo que outras aplicações se conectem a ele.
+
+### Volumes e Persistência de Dados
+
+Para garantir a persistência dos dados entre execuções do contêiner, utilizamos volumes. Um volume mapeia um diretório do sistema host para um diretório no contêiner. Isso é crucial para bancos de dados, pois sem um volume, ao remover o contêiner, todos os dados armazenados dentro dele se perderiam.
+
+No PostgreSQL, o diretório padrão para armazenamento de dados é /var/lib/postgresql/data. Mapeamos esse diretório para um volume (neste caso "pgdata") em nossa máquina host para garantir a persistência dos dados:
+
+```bash
+docker run -d \
+    --name app_database \
+    -e POSTGRES_USER=app_user \
+    -e POSTGRES_DB=app_db \
+    -e POSTGRES_PASSWORD=app_password \
+    -v pgdata:/var/lib/postgresql/data \
+    -p 5432:5432 \
+    postgres
+```
+
+O parâmetro do volume é passado ao contêiner usando o parâmetro -v Dessa forma, os dados do banco continuarão existindo, mesmo que o contêiner seja reiniciado ou removido.
+
+### Adicionando o suporte ao PostgreSQL na nossa aplicação
+
+Para que o SQLAlchemy suporte o PostgreSQL, precisamos instalar uma dependência chamada psycopg2-binary. Este é o adaptador PostgreSQL para Python e é crucial para fazer a comunicação.
+
+Para instalar essa dependência, utilize o seguinte comando:
+
+```bash
+poetry add psycopg2-binary
+```
+
+Uma das vantagens do SQLAlchemy enquanto ORM é a flexibilidade. Com apenas algumas alterações mínimas, como a atualização da string de conexão, podemos facilmente transicionar para um banco de dados diferente. Assim, após ajustar o arquivo .env com a string de conexão do PostgreSQL, a aplicação deverá operar normalmente, mas desta vez utilizando o PostgreSQL.
+
+Para ajustar a conexão com o PostgreSQL, modifique seu arquivo .env para incluir a seguinte string de conexão:
+
+```.env
+DATABASE_URL="postgresql://app_user:app_password@localhost:5432/app_db"
+```
